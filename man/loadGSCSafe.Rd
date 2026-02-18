@@ -4,13 +4,7 @@
 \alias{loadGSCSafe}
 \title{Safely load gene set collections from common formats}
 \usage{
-loadGSCSafe(
-  file,
-  type = "auto",
-  addInfo = NULL,
-  sep = "\\t",
-  encoding = "latin1"
-)
+loadGSCSafe(file, type = "auto", addInfo, sep = "\\t", encoding = "latin1")
 }
 \arguments{
 \item{file}{Character file path (for GMT or SIF) or a data.frame}
