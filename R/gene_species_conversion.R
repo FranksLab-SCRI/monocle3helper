@@ -1,77 +1,94 @@
-.convert_gene_list_biomart <- function(
+#' Convert Gene Identifiers Using g:Profiler Orthology Mapping
+#'
+#' Internal helper that maps gene identifiers between species using
+#' the g:Profiler \code{gorth()} service. This function provides robust
+#' ortholog mapping without relying on Ensembl BioMart mirrors.
+#'
+#' @param genes Character vector of gene symbols.
+#' @param from_organism Source organism (g:Profiler format, e.g. "hsapiens").
+#' @param to_organism Target organism (g:Profiler format, e.g. "mmusculus").
+#'
+#' @return Character vector of mapped gene symbols in the target species.
+#'
+#' @keywords internal
+.convert_gene_list_gorth <- function(
     genes,
-    from_dataset,
-    from_attr,
-    to_dataset,
-    to_attr
+    from_organism,
+    to_organism
 ) {
 
-  if (!requireNamespace("biomaRt", quietly = TRUE)) {
+  if (!requireNamespace("gprofiler2", quietly = TRUE)) {
     stop(
-      "Package 'biomaRt' is required for gene conversion. ",
-      "Install it with BiocManager::install('biomaRt')."
+      "Package 'gprofiler2' is required for ortholog mapping. ",
+      "Install it with install.packages('gprofiler2')."
     )
   }
 
-  mart_from <- biomaRt::useMart(
-    "ensembl",
-    dataset = from_dataset
+  # Remove NA and duplicates
+  genes <- unique(stats::na.omit(genes))
+
+  if (length(genes) == 0) {
+    return(character())
+  }
+
+  # Query g:Profiler
+  res <- try(
+    gprofiler2::gorth(
+      query = genes,
+      source_organism = from_organism,
+      target_organism = to_organism
+    ),
+    silent = TRUE
   )
 
-  mart_to <- biomaRt::useMart(
-    "ensembl",
-    dataset = to_dataset
-  )
+  if (inherits(res, "try-error") || is.null(res)) {
+    warning("g:Profiler ortholog mapping failed.")
+    return(character())
+  }
 
-  res <- biomaRt::getLDS(
-    attributes = from_attr,
-    filters = from_attr,
-    values = genes,
-    mart = mart_from,
-    attributesL = to_attr,
-    martL = mart_to,
-    uniqueRows = TRUE
-  )
-
-  unique(res[[to_attr]])
+  # Extract target genes
+  unique(res$target)
 }
 
-
-#' Convert a human gene list to mouse orthologs
+#' Convert a Human Gene List to Mouse Orthologs
 #'
-#' Uses Ensembl BioMart to map human HGNC symbols to mouse MGI symbols.
+#' Uses the g:Profiler \code{gorth()} service to map human gene symbols
+#' (HGNC) to mouse gene symbols (MGI).
 #'
-#' @param genes Character vector of human gene symbols (HGNC)
+#' This approach is more robust and reproducible than Ensembl BioMart
+#' for cross-species transcriptomic analyses.
 #'
-#' @return Character vector of mouse gene symbols (MGI)
+#' @param genes Character vector of human gene symbols (HGNC).
+#'
+#' @return Character vector of mouse gene symbols (MGI).
+#'
 #' @export
 convert_human_to_mouse <- function(genes) {
 
-  .convert_gene_list_biomart(
+  .convert_gene_list_gorth(
     genes = genes,
-    from_dataset = "hsapiens_gene_ensembl",
-    from_attr = "hgnc_symbol",
-    to_dataset = "mmusculus_gene_ensembl",
-    to_attr = "mgi_symbol"
+    from_organism = "hsapiens",
+    to_organism = "mmusculus"
   )
 }
 
 
-#' Convert a mouse gene list to human orthologs
+#' Convert a Mouse Gene List to Human Orthologs
 #'
-#' Uses Ensembl BioMart to map mouse MGI symbols to human HGNC symbols.
+#' Uses the g:Profiler \code{gorth()} service to map mouse gene symbols
+#' (MGI) to human gene symbols (HGNC).
 #'
-#' @param genes Character vector of mouse gene symbols (MGI)
+#' @param genes Character vector of mouse gene symbols (MGI).
 #'
-#' @return Character vector of human gene symbols (HGNC)
+#' @return Character vector of human gene symbols (HGNC).
+#'
 #' @export
 convert_mouse_to_human <- function(genes) {
 
-  .convert_gene_list_biomart(
+  .convert_gene_list_gorth(
     genes = genes,
-    from_dataset = "mmusculus_gene_ensembl",
-    from_attr = "mgi_symbol",
-    to_dataset = "hsapiens_gene_ensembl",
-    to_attr = "hgnc_symbol"
+    from_organism = "mmusculus",
+    to_organism = "hsapiens"
   )
 }
+

@@ -18,6 +18,7 @@ Imports:
     data.table,
     dplyr,
     ggplot2,
+    gprofiler2,
     hdf5r,
     imager,
     jsonlite,
@@ -31,6 +32,5 @@ Imports:
     tools,
     utils
 Suggests: 
-    biomaRt,
     rsbml
 RoxygenNote: 7.3.3

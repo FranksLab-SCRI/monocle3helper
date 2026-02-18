@@ -2,16 +2,17 @@
 % Please edit documentation in R/gene_species_conversion.R
 \name{convert_mouse_to_human}
 \alias{convert_mouse_to_human}
-\title{Convert a mouse gene list to human orthologs}
+\title{Convert a Mouse Gene List to Human Orthologs}
 \usage{
 convert_mouse_to_human(genes)
 }
 \arguments{
-\item{genes}{Character vector of mouse gene symbols (MGI)}
+\item{genes}{Character vector of mouse gene symbols (MGI).}
 }
 \value{
-Character vector of human gene symbols (HGNC)
+Character vector of human gene symbols (HGNC).
 }
 \description{
-Uses Ensembl BioMart to map mouse MGI symbols to human HGNC symbols.
+Uses the g:Profiler \code{gorth()} service to map mouse gene symbols
+(MGI) to human gene symbols (HGNC).
 }
