@@ -29,7 +29,7 @@ aggregate_gene_score <- function(
     return(cds)
   }
 
-  counts_mat <- monocle3::counts(cds)[idx, , drop = FALSE]
+  counts_mat <- monocle3::exprs(cds)[idx, , drop = FALSE]
   size_factors <- SummarizedExperiment::colData(cds)$Size_Factor
 
   expr <- t(t(counts_mat) / size_factors)
