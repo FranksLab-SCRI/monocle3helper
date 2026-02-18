@@ -47,7 +47,7 @@
   }
 
   # Extract target genes
-  unique(res$target)
+  unique(res$ortholog_name)
 }
 
 #' Convert a Human Gene List to Mouse Orthologs
