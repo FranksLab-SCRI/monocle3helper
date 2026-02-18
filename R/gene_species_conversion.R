@@ -25,7 +25,7 @@
   }
 
   # Remove NA and duplicates
-  genes <- unique(stats::na.omit(genes))
+  genes <- unique(na.omit(genes))
 
   if (length(genes) == 0) {
     return(character())
