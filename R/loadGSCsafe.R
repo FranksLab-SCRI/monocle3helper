@@ -54,33 +54,47 @@ loadGSCSafe <- function(
   ## ----------------------------
   if (type == "gmt") {
 
-    con <- base::file(file, encoding = encoding)
-    on.exit(close(con), add = TRUE)
+    # Read all lines at once
+    lines <- readLines(file, encoding = encoding)
 
-    gsc <- list()
-    addInfo_local <- NULL
+    # Split on tab
+    split_lines <- strsplit(lines, sep, fixed = TRUE)
 
-    while (length(line <- scan(
-      con,
-      nlines = 1,
-      what = "character",
-      quiet = TRUE,
-      sep = sep
-    )) > 0) {
+    # Preallocate
+    n <- length(split_lines)
 
-      if (addUserInfo == "skip") {
-        addInfo_local <- rbind(addInfo_local, line[1:2])
-      }
+    gsc <- vector("list", n)
+    names(gsc) <- character(n)
 
-      genes <- unique(line[-c(1, 2)])
-      genes <- genes[genes != "" & !is.na(genes)]
-      gsc[[line[1]]] <- genes
+    if (addUserInfo == "skip") {
+      addInfo_local <- matrix(NA_character_, n, 2)
     }
 
-    gsc <- gsc[!duplicated(names(gsc))]
+    for (i in seq_len(n)) {
 
-    if (addUserInfo == "skip" && !is.null(addInfo_local)) {
-      addInfo <- unique(addInfo_local)
+      line <- split_lines[[i]]
+
+      set_name <- line[1]
+      description <- line[2]
+
+      genes <- line[-c(1, 2)]
+      genes <- genes[genes != "" & !is.na(genes)]
+
+      names(gsc)[i] <- set_name
+      gsc[[i]] <- genes
+
+      if (addUserInfo == "skip") {
+        addInfo_local[i, ] <- c(set_name, description)
+      }
+    }
+
+    # Remove duplicates
+    keep <- !duplicated(names(gsc))
+    gsc <- gsc[keep]
+
+    if (addUserInfo == "skip") {
+      addInfo <- unique(addInfo_local[keep, , drop = FALSE])
+      addInfo <- as.data.frame(addInfo, stringsAsFactors = FALSE)
     }
   }
 
