@@ -35,6 +35,8 @@
 #'   EMT  = c("Vim", "Cdh2", "Zeb1")
 #' )
 #'
+#'
+#'
 #' scores <- score_gene_sets(
 #'   cds,
 #'   gene_sets,
@@ -101,14 +103,11 @@ score_gene_sets <- function(cds,
     )
 
     # Extract scores
-    result <- as.matrix(agg["1", , drop = FALSE])
+    if (nrow(agg) == 0) next
 
-    colnames(result) <- set_name
+    results[[set_name]] <- as.numeric(agg[1, ])
 
-    # Append
-    results <- cbind(results, result)
 
-    rm(gene.group, agg, result)
   }
 
   return(results)
